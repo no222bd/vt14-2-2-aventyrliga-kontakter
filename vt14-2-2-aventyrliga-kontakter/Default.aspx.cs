@@ -42,27 +42,31 @@ namespace vt14_2_2_aventyrliga_kontakter
         // UPDATE
         public void ContactListView_UpdateItem(int ContactID)
         {
-            try
+            // Check Validationcontrols on server
+            if (IsValid)
             {
-                var contact = Service.GetContact(ContactID);
-                
-                if (contact == null)
+                try
                 {
-                    ModelState.AddModelError(String.Empty, String.Format("Kontakt med ID {0} fanns ej", ContactID));
+                    var contact = Service.GetContact(ContactID);
 
-                    return;
+                    if (contact == null)
+                    {
+                        ModelState.AddModelError(String.Empty, String.Format("Kontakt med ID {0} fanns ej", ContactID));
+
+                        return;
+                    }
+
+                    // Check if new data passes validation
+                    if (TryUpdateModel(contact))
+                    {
+                        Service.SaveContact(contact);
+                        ShowMessage("uppdaterats");
+                    }
                 }
-
-                // Check if new data passes validation
-                if (TryUpdateModel(contact))
+                catch (Exception ex)
                 {
-                    Service.SaveContact(contact);
-                    ShowMessage("uppdaterats");
+                    ModelState.AddModelError(String.Empty, ex.Message);
                 }
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError(String.Empty, ex.Message);
             }
         }
 
